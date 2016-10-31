@@ -1,8 +1,3 @@
-
-
-/**
- * Created by 151642b on 10/24/2016.
- */
 package demo;
 
 import javax.servlet.ServletException;
@@ -12,12 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
- * Created by chitboon on 10/23/15.
+ * Created by 151642b on 10/24/2016.
  */
-@WebServlet(name = "BookDetailsServlet", urlPatterns = "/bookdetails")
-public class BookDetailsServlet extends HttpServlet {
+
+@WebServlet(name = "BookCatalogServlet", urlPatterns="/bookcatalog")
+public class BookCatalogServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
@@ -25,6 +22,8 @@ public class BookDetailsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         PrintWriter out = response.getWriter();
         try {
+            BookDBAO db = new BookDBAO();
+            List<BookDetails> list = db.getAllBook();
             out.println("<html>" + "<head><title>Duke's Bookstore</title></head>" +
                     "<body  bgcolor=\"#ffffff\">" + "<center>" +
                     "<hr> <br> &nbsp;" + "<h1>" +
@@ -33,29 +32,27 @@ public class BookDetailsServlet extends HttpServlet {
                     "<font size=\"+3\" color=\"black\">Bookstore</font>" + "</h1>" +
                     "</center>" + "<br> &nbsp; <hr> <br> ");
 
-            String bookId = request.getParameter("bookId");
-            if (bookId != null) {
-                BookDBAO db = new BookDBAO();
-                BookDetails bd = db.getBookDetails(bookId);
+            out.println("<br> &nbsp;" + "<h3>Please Choose from our selection" +
+                    "</h3>" + "<center> <table summary=\"layout\">");
 
-                //Print out the information obtained
-                out.println("<h2>" + bd.getTitle() + "</h2>" + "&nbsp;" +
-                        " by<em>" + bd.getFirstName() +
-                        " " + bd.getSurname() + "</em> &nbsp; &nbsp; " + "(" +
-                        bd.getYear() + ")<br> &nbsp; <br>" + "<h4>" +
-                        "Here's what the critcs say: </h4><blockquote>" +
-                        bd.getDescription() + "</blockquote>" + "<h4>" +
-                        "Our Price: " + bd.getPrice() + "</h4>" +
-                        "<p><strong><a href=\"" +
+            for (BookDetails book : list) {
+                String bookId = book.getBookId();
+                out.println("<tr>" + "<td bgcolor=\"#ffffaa\">" + "<a href=\"" +
                         response.encodeURL(request.getContextPath() +
-                                "/bookcatalog?bookId=" + bookId) + "\">" +
-                        "Add to Cart</a>&nbsp;&nbsp;&nbsp;" +
+                                "/bookdetails?bookId=" + bookId) + "\"> <strong>" +
+                        book.getTitle() + "&nbsp; </strong></a></td>" +
+                        "<td bgcolor=\"#ffffaa\" rowspan=2>" + book.getPrice() +
+                        "&nbsp; </td>" + "<td bgcolor=\"#ffffaa\" rowspan=2>" +
                         "<a href=\"" +
                         response.encodeURL(request.getContextPath() +
-                                "/bookcatalog") + "\">" +
-                        "Continue Shopping</a></p></strong>");
+                                "/bookcatalog?bookId=" + bookId) + "\"> &nbsp;" +
+                        "Add to Cart&nbsp;</a></td></tr>" +
+                        "<tr>" + "<td bgcolor=\"#ffffff\">" + "&nbsp; &nbsp;" +
+                        "by<em> " + book.getFirstName() +
+                        " " + book.getSurname() + "</em></td></tr>");
             }
-            out.println("</body></html>");
+
+            out.println("</table></center></body></html>");
         } catch (Exception e) {
             e.printStackTrace();
             throw new ServletException(e);
